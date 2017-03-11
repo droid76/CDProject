@@ -4,7 +4,7 @@ preProcessorDirective: hashOperator include < header_file >  preProcessorDirecti
 					| #define identifier number preProcessorDirective 
 					| e
 
-header_file: stdio.h | stdlib.h | string.h 
+header_file: identifer '.h'
 
 externDeclaration: extern declarationStatement ;
 
