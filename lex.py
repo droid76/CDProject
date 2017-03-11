@@ -77,7 +77,7 @@ def lexer():
 		symbolTable[tokenType] = list()
 		
 	if((tokenType != False) and lexeme not in symbolTable[tokenType]):
-		symbolTable[tokenType].append(lexeme)
+		symbolTable[tokenType].append(lexeme.strip())
 	
 	#print("TOKEN: " + str(lexeme) + " TYPE: " + str(tokenType) + "\n");
 	#print(str(lb) + " " + str(fp) + "\n")
@@ -106,8 +106,8 @@ def preProcessorDirective():
 	status = 0
 	token = lexer()
 	
-	token_type = str(list(token.keys())[0])
-	token_value = str(list(token.values())[0])
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
 	
 	if(token_type == "hashOperator"):
 		
@@ -175,9 +175,10 @@ def preProcessorDirective():
 				
 				if(token_type == "number"):
 					
-					variableValue = token_value
+					variableValue = int(token_value.strip())
 					symbolTable[variableName] = variableValue
 					status = preProcessorDirective()
+					
 					
 				else:
 					print("Syntax error: expected 'Number' but received " + str(token_value) + "\n")
@@ -189,23 +190,141 @@ def preProcessorDirective():
 		else:
 			print("Syntax error: expected 'Keyword include/define' but received " + str(token_value) + "\n")
 			status = 1
-	
+	else:
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
 		
 	return status
 	#print("Token key: " + str((token_type) + " values: " + str(token_value) + "\n"))	
 
 def externDeclaration():
-	return 0
+	
+	
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
 
+	if(token_type == "keyword" and token_value == "extern"):
+
+		status = declarationStatement()
+		if(status == 0):
+		
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0].strip()
+
+			if(not (token_type == "punctuator" and token_value == ";")):
+				print("Syntax error: expected 'Punctuator Semicolon' but received " + str(token_value) + "\n")
+				status = 1
+	else:
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)	
+	return status
+
+def declarationStatement():
+	
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+
+	if(token_type == 'dataType'):
+		
+		dataType = token_value.strip()
+		status = variable(dataType)
+		
+	else:
+		print("Syntax error: expected 'Data Type' but received " + str(token_value) + "\n")
+		status = 1
+	
+	return status
+	
+	
+def variable(dataType):
+
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	if(token_type == 'identifier'):
+		
+		#print("received identifier, " + str(token_value))
+		variableName = token_value.strip()
+		
+		if(dataType not in externalVariables):
+			externalVariables[dataType] = list()
+		
+		if(variableName not in externalVariables[dataType]):
+			externalVariables[dataType].append(variableName)
+		
+		#externalVariables.append([variableName, dataType])
+		status = variableDash(dataType)
+	else:
+		print("Syntax error: expected 'Identifier' but received " + str(token_value) + "\n")
+		status = 1
+	
+	return status
+
+def variableDash(dataType):
+
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	if(token_type == 'punctuator' and token_value == ','):
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == 'identifier'):
+			
+			variableName = token_value.strip()
+			if(dataType not in externalVariables):
+				externalVariables[dataType] = list()
+		
+			if(variableName not in externalVariables[dataType]):
+				externalVariables[dataType].append(variableName)
+			#externalVariables.append([variableName, dataType])
+			variableDash(dataType)
+		
+		else:
+			print("Syntax error: expected 'Identifier' but received " + str(token_value) + "\n")
+			status = 1
+	else:
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+		#print(str(lb) + " " + str(fp))
+
+	return status
+	
 def mainFunction():
-	return 0
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	return status
+	
 prg = open("nocomments.c").read()
 
 lb = 0
 fp = 1
 
 symbolTable = dict()
-keyword = ["include", "define", "while", "do", "for", "return","main"]
+externalVariables = dict()
+keyword = ["include", "define", "while", "do", "for", "return","main", "extern"]
 dataType = ["void", "int", "short", "long", "char", "float", "double"]
 preDefRoutine = ["printf", "scanf"]
 #headerFile = ["stdio.h", "stdlib.h", "math.h", "string.h"]
@@ -225,7 +344,7 @@ while lb!=len(prg):
 	lexer()
 """
 #print(symbolTable)
-
+#print(externalVariables)
 """
 PARSER ERROR CODES:
 

@@ -1,7 +1,4 @@
 #include<stdio.h>
 #define a 10
 
-int main()
-{
-	
-}
+extern int x, y;

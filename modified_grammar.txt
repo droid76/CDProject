@@ -4,21 +4,19 @@ preProcessorDirective: hashOperator include < header_file >  preProcessorDirecti
 					| #define identifier number preProcessorDirective 
 					| e
 
-header_file: identifer '.h'
+headerFile: identifer '.h'
 
 externDeclaration: extern declarationStatement ;
 
-declarationStatement: dataType declar
+declarationStatement: dataType variable
 
-declar: identifier | multipleDeclaration 
+variable: identifier variableDash
 
-multipleDeclaration: identifier multdeclar
-
-multdeclar: , multipleDeclaration | e
+variableDash: , identifier variableDash | e
 
 mainFunction: int main_dash
 
-main_dash: main(){statements} | main(int argc, char *argv[]){statements}
+mainDash: main(){statements} | main(int argc, char *argv[]){statements}
 
 
 statements:	declarationStatement ; | initializationStatement ; | assignmentStatement ; | conditionalStatement ; |

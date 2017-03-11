@@ -1,9 +1,10 @@
 program: preProcessorDirective externDeclaration mainFunction
 
 preProcessorDirective: hashOperator include < header_file >  preProcessorDirective 
-					| #define identifier number preProcessorDirective | e
+					| #define identifier number preProcessorDirective 
+					| e
 
-header_file: stdio.h | stdlib.h | string.h 
+headerFile: identifer '.h'
 
 externDeclaration: extern declarationStatement ;
 
@@ -17,7 +18,7 @@ multdeclar: , multipleDeclaration | e
 
 mainFunction: int main_dash
 
-main_dash: main(){statements} | main(int argc, char *argv[]){statements}
+mainDash: main(){statements} | main(int argc, char *argv[]){statements}
 
 
 statements:	declarationStatement ; | initializationStatement ; | assignmentStatement ; | conditionalStatement ; |
