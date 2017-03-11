@@ -1,0 +1,6 @@
+int main() {
+		int x = 5;//Hello 
+	   
+	   }
+	   
+	   "Modified grammar rules for declaration statements and added a function to parse external declarations. Also, added a "

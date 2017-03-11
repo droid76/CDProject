@@ -344,7 +344,7 @@ while lb!=len(prg):
 	lexer()
 """
 #print(symbolTable)
-#print(externalVariables)
+print(externalVariables)
 """
 PARSER ERROR CODES:
 
