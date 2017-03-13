@@ -10,6 +10,9 @@ externDeclaration: extern declarationStatement ;
 
 declarationStatement: dataType variable
 
+optionalDeclarationStatement:	dataType variable 
+								| e
+
 variable: identifier variableDash
 
 variableDash: , identifier variableDash | e
@@ -19,8 +22,11 @@ mainFunction: int main_dash
 mainDash: main(){statements} | main(int argc, char *argv[]){statements}
 
 
-statements:	declarationStatement ; | initializationStatement ; | assignmentStatement ; | conditionalStatement ; |
-			do{statements} while(condition);
+statements:	optDeclarationStatement ; statements
+			| initializationStatement ; statements
+			| assignmentStatement ; statements
+			| do{statements} while(condition); statements
+			| e
 			
 
 
