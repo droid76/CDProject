@@ -8,21 +8,25 @@ headerFile: identifer '.h'
 
 externDeclaration: extern declarationStatement ;
 
-declarationStatement: dataType declar
+declarationStatement: dataType variable
 
-declar: identifier | multipleDeclaration 
+optionalDeclarationStatement:	dataType variable
+								| e
 
-multipleDeclaration: identifier multdeclar
+variable: identifier variableDash
 
-multdeclar: , multipleDeclaration | e
+variableDash: , identifier variableDash | e
 
 mainFunction: int main_dash
 
 mainDash: main(){statements} | main(int argc, char *argv[]){statements}
 
 
-statements:	declarationStatement ; | initializationStatement ; | assignmentStatement ; | conditionalStatement ; |
-			do{statements} while(condition);
+statements:	optDeclarationStatement ; statements
+			| initializationStatement ; statements
+			| assignmentStatement ; statements
+			| do{statements} while(condition); statements
+			| e
 			
 
 

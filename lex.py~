@@ -244,6 +244,37 @@ def declarationStatement():
 	
 	return status
 	
+def optionalDeclarationStatement():
+	
+	#print("IN OPTDECL")
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	#print("before reset: " + str(token_value))
+
+	if(token_type == 'dataType'):
+	
+		dataType = token_value.strip()
+		status = variable(dataType)
+		
+	else:
+	
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		#print("resetting")
+		global lb, fp
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+		status = 2
+		"""
+		if(token_value != "do"):
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0]
+		"""
+		#print("after reset: " + str(token_value))
+	return status
+	
 	
 def variable(dataType):
 
@@ -315,8 +346,319 @@ def mainFunction():
 	token_type = list(token.keys())[0]
 	token_value = list(token.values())[0]
 	
+	if(token_type == "dataType" and token_value == "int"):
+		
+		status = mainDash()
+		
+	else:
+		print("Syntax error: expected 'Return Type Integer' but received " + str(token_value) + "\n")
+		status = 1
+	
 	return status
 	
+	
+def mainDash():
+
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0].strip()
+	
+	#print(str(token_type) + " " + str(token_value))
+	
+	if(token_type == "identifier" and token_value == "main"):
+	
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0].strip()
+		
+		if(token_type == "punctuator" and token_value == "("):
+		
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0].strip()
+			
+			if(token_type == "punctuator" and token_value == ")"):
+			
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0].strip()
+				
+				if(token_type == "punctuator" and token_value == "{"):
+				
+					status = statements()
+					
+					if(status == 0):
+						
+						token = lexer()
+						token_type = list(token.keys())[0]
+						token_value = list(token.values())[0].strip()
+						#print(token_value + str(len(token_value)))
+						if(not(token_type == "punctuator" and token_value == "}")):
+							print("Syntax error: expected 'Punctuator1 close curly bracket' but received " + str(token_value) + "\n")
+							status = 1
+				else:
+					print("Syntax error: expected 'Punctuator open curly bracket' but received " + str(token_value) + "\n")
+					status = 1
+						
+				
+			
+			elif(token_type == "dataType" and token_value == "int"):
+			
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0].strip()
+				
+				if(token_type == "identifier" and token_value == "argc"):
+				
+					token = lexer()
+					token_type = list(token.keys())[0].strip()
+					token_value = list(token.values())[0].strip()
+					
+					if(token_type == "punctuator" and token_value == ","):
+				
+						token = lexer()
+						token_type = list(token.keys())[0]
+						token_value = list(token.values())[0].strip()
+						
+						if(token_type == "dataType" and token_value == "char"):
+				
+							token = lexer()
+							token_type = list(token.keys())[0]
+							token_value = list(token.values())[0].strip()
+							
+							if(token_type == "arithmeticOperator" and token_value == "*"):
+				
+								token = lexer()
+								token_type = list(token.keys())[0]
+								token_value = list(token.values())[0]	.strip()
+								
+								if(token_type == "identifier" and token_value == "argv"):
+				
+									token = lexer()
+									token_type = list(token.keys())[0]
+									token_value = list(token.values())[0].strip()
+									
+									if(token_type == "punctuator" and token_value == "["):
+				
+										token = lexer()
+										token_type = list(token.keys())[0]
+										token_value = list(token.values())[0].strip()
+										
+										if(token_type == "punctuator" and token_value == "]"):
+				
+											token = lexer()
+											token_type = list(token.keys())[0]
+											token_value = list(token.values())[0].strip()
+											
+											if(token_type == "punctuator" and token_value == ")"):
+				
+												token = lexer()
+												token_type = list(token.keys())[0]
+												token_value = list(token.values())[0].strip()
+											
+												if(token_type == "punctuator" and token_value == "{"):
+				
+													status = statements()
+					
+													if(status == 0):
+						
+														token = lexer()
+														token_type = list(token.keys())[0]
+														token_value = list(token.values())[0].strip()
+				
+														if(not(token_type == "punctuator" and token_value == "}")):
+															print("Syntax error: expected 'Punctuator2 close curly bracket' ", end = "")
+															print("but received " + str(token_value) + "\n")
+															status = 1
+												else:
+													print("Syntax error: expected 'Punctuator open curly bracket'  ", end = "")
+													print("but received " + str(token_value) + "\n")
+													status = 1
+											
+											else:
+												print("Syntax error: expected 'Punctuator close round bracket' but received ", end = "")
+												print(str(token_value) + "\n")
+												status = 1
+											
+										else:
+											print("Syntax error: expected 'Punctuator close square bracket' but received ", end = "")
+											print(str(token_value) + "\n")
+											status = 1
+									else:
+										print("Syntax error: expected 'Punctuator open square bracket' but received ", end = "")
+										print(str(token_value) + "\n")
+										status = 1
+									
+								else:
+									print("Syntax error: expected 'Identifier argv' but received " + str(token_value) + "\n")
+									status = 1
+									
+							else:
+								print("Syntax error: expected 'Pointer operator *' but received " + str(token_value) + "\n")
+								status = 1
+							
+						else:
+							print("Syntax error: expected 'Data type character' but received " + str(token_value) + "\n")
+							status = 1
+						
+					else:
+						print("Syntax error: expected 'Punctuator comma' but received " + str(token_value) + "\n")
+						status = 1	
+				
+				else:
+					print("Syntax error: expected 'Identifier argc' but received " + str(token_value) + "\n")
+					status = 1
+				
+			
+			else:
+				print("Syntax error: expected 'Punctuator close round bracket' but received " + str(token_value) + "\n")
+				status = 1
+				
+		else:
+			print("Syntax error: expected 'Punctuator open round bracket' but received " + str(token_value) + "\n")
+			status = 1
+	
+	else:
+		print("Syntax error: expected 'Identifier main' but received " + str(token_value) + "\n")
+		status = 1
+		
+	return status
+	
+def statements():
+	
+	
+	#print("top of statements\n")
+	status = 0
+	
+	status = optionalDeclarationStatement()
+	
+	if(status == 0):
+		print("decl success")
+		status = statements()
+	else:
+		status = initializationStatement()
+		if(status == 0):	
+			print("init success")
+			status = statements()
+		else:
+			
+			status = assignmentStatement()
+			if(status == 0):
+				print("assgn success")
+				status = statements()
+			else:
+				
+				status = 0
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0]
+				#print("IN statements: " + token_value)
+				if(token_type == "keyword" and token_value == "do"):
+		
+					token = lexer()
+					token_type = list(token.keys())[0]
+					token_value = list(token.values())[0].strip()
+					
+					if(token_type == "punctuator" and token_value == "{"):
+					
+						#status = statements()
+						
+						#print("status: " + str(status))
+						if(status == 0):
+					
+							token = lexer()
+							token_type = list(token.keys())[0]
+							token_value = list(token.values())[0].strip()
+							#print(token_value)
+							if(token_type == "punctuator" and token_value == "}"):
+					
+								token = lexer()
+								token_type = list(token.keys())[0]
+								token_value = list(token.values())[0].strip()
+		
+								if(token_type == "keyword" and token_value == "while"):
+					
+									token = lexer()
+									token_type = list(token.keys())[0]
+									token_value = list(token.values())[0].strip()
+		
+									if(token_type == "punctuator" and token_value == "("):
+							
+										status = condition()
+								
+										if(status == 0):
+					
+											token = lexer()
+											token_type = list(token.keys())[0]
+											token_value = list(token.values())[0].strip()
+		
+											if(token_type == "punctuator" and token_value == ")"):
+					
+												token = lexer()
+												token_type = list(token.keys())[0]
+												token_value = list(token.values())[0].strip()
+		
+												if(token_type == "punctuator" and token_value == ";"):
+													print("in statements: " + token_value + "\n")
+													status = statements()
+					
+												else:
+													print("Syntax error: expected 'Punctuator semicolon' ", end = "")
+													print("but received " + str(token_value) + "\n")
+													status = 1
+					
+											else:
+												print("Syntax error: expected 'Punctuator close round bracket' ", end = "")
+												print("but received " + str(token_value) + "\n")
+												status = 1
+					
+									else:
+										print("Syntax error: expected 'Punctuator open round bracket' ", end = "") 
+										print("but received " + str(token_value) + "\n")
+										status = 1
+					
+								else:
+									print("Syntax error: expected 'Keyword while' but received " + str(token_value) + "\n")
+									status = 1
+					
+							else:
+								print("Syntax error: expected 'Punctuator10 close curly bracket' but received " + str(token_value) + "\n")
+								status = 1
+				
+					else:
+						print("Syntax error: expected 'Punctuator open curly bracket' but received " + str(token_value) + "\n")
+						status = 1
+		
+				else:
+		
+					#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+					global lb, fp
+					#print(token_value)
+					#print(str(lb) + " " + str(fp))
+					lb = lb - len(token_value)
+					fp = fp - len(token_value)
+	
+	return status
+
+def initializationStatement():
+
+	status = 1
+	
+	return status
+	
+def assignmentStatement():
+
+	status = 1
+	
+	return status
+
+def condition():
+
+	status = 0
+	
+	return status
+
 prg = open("nocomments.c").read()
 
 lb = 0
@@ -324,7 +666,7 @@ fp = 1
 
 symbolTable = dict()
 externalVariables = dict()
-keyword = ["include", "define", "while", "do", "for", "return","main", "extern"]
+keyword = ["include", "define", "while", "do", "for", "return", "extern"]
 dataType = ["void", "int", "short", "long", "char", "float", "double"]
 preDefRoutine = ["printf", "scanf"]
 #headerFile = ["stdio.h", "stdlib.h", "math.h", "string.h"]
@@ -344,7 +686,7 @@ while lb!=len(prg):
 	lexer()
 """
 #print(symbolTable)
-print(externalVariables)
+#print(externalVariables)
 """
 PARSER ERROR CODES:
 
