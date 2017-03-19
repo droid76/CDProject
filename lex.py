@@ -37,6 +37,12 @@ def validLexeme(string):
 		res = "hashOperator"
 	elif(string == ".h"):
 		res = "headerExtension"
+	elif(string == "true" or string == "false"):
+		res = "boolean"
+	elif(string == "++"):
+		res = "incrementOperator"
+	elif(string == "--"):
+		res = "decrementOperator"
 	return res
 	
 def lexer():
@@ -530,23 +536,49 @@ def statements():
 	
 	#print("top of statements\n")
 	status = 0
-	
-	status = optionalDeclarationStatement()
+	status = initializationStatement()
 	
 	if(status == 0):
-		print("decl success")
-		status = statements()
-	else:
-		status = initializationStatement()
-		if(status == 0):	
-			print("init success")
+		#print("init success")
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		tv = token_value.strip()
+		if(token_type == "punctuator" and tv == ";"):
 			status = statements()
+		else:
+			print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+			status = 1
+			
+	else:
+		status = optionalDeclarationStatement()
+		if(status == 0):	
+			#print("decl success")
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0]
+			tv = token_value.strip()
+			if(token_type == "punctuator" and tv == ";"):
+				status = statements()
+			else:
+				print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+				status = 1
 		else:
 			
 			status = assignmentStatement()
 			if(status == 0):
-				print("assgn success")
-				status = statements()
+				#print("assgn success")
+				
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0]
+				tv = token_value.strip()
+				if(token_type == "punctuator" and tv == ";"):
+					status = statements()
+				else:
+					print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+					status = 1
 			else:
 				
 				status = 0
@@ -562,7 +594,7 @@ def statements():
 					
 					if(token_type == "punctuator" and token_value == "{"):
 					
-						#status = statements()
+						status = statements()
 						
 						#print("status: " + str(status))
 						if(status == 0):
@@ -643,13 +675,140 @@ def statements():
 
 def initializationStatement():
 
-	status = 1
+	status = 0
+	
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+
+	if(token_type == "dataType"):
+	
+		status = initStat()
+	else:
+		
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+		status = 2
+		
+	return status
+	
+	
+def initStat():
+
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	if(token_type == "identifier"):
+		
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == "assignmentOperator" and token_value == "="):
+				
+			status = E()
+			
+		else:
+			
+			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
+			status = 1
+			
+	else:
+	
+		status = multipleInitialization()
+		
+	return status
+		
+def mutipleInitialization():
+
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	if(token_type == "identifier"):
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == "assignmentOperator" and token_value == "="):
+				
+			status = multinit()
+			
+		else:
+			
+			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
+			status = 1
+	else:
+			
+		print("Syntax error: expected 'Identifier' but received " + str(token_value) + "\n")
+		status = 1
 	
 	return status
 	
+def multinit():
+
+	status = 0
+	
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "punctuator" and tv == ","):
+	
+		status = multipleInitialization()
+	
+	else:
+		
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+		status = 2
+		
+	return status
+
 def assignmentStatement():
 
-	status = 1
+	status = 0
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	
+	if(token_type == "identifier"):
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == "assignmentOperator" and token_value == "="):
+				
+			status = E()
+			
+		else:
+			
+			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
+			status = 1
+	else:
+			
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+		status = 2
 	
 	return status
 
@@ -657,7 +816,221 @@ def condition():
 
 	status = 0
 	
+	status = E()
+	
+	if(status == 0):
+	
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == "relationalOperator" or token_type == "logicalOperator"):
+		
+			status = E()
+		
+		else:
+			
+			print("Syntax error: expected 'Relational/Logical Operator' but received " + str(token_value) + "\n")
+			status = 1
+		
+	elif(status == 2):
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(not (token_type == "boolean")):
+		
+			print("Syntax error: expected 'Boolean' but received " + str(token_value) + "\n")
+			status = 1
+			
 	return status
+	
+
+def E():
+
+	status = F()
+
+	if(status == 0):
+	
+		status = E1()
+	
+	return status
+	
+def E1():
+
+	status = 0
+
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "arithmeticOperator" and tv == "+"):
+	
+		status = F()
+		
+		if(status == 0):
+		
+			status = E1()
+			
+	else:
+	
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+
+	return status
+
+
+def F():
+
+	status = 0
+	
+	status = G()
+	
+	if(status == 0):
+	
+		status = F1()
+
+	return status
+	
+def F1():
+
+	status = 0
+
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "arithmeticOperator" and tv == "-"):
+	
+		status = G()
+		
+		if(status == 0):
+		
+			status = F1()
+			
+	else:
+	
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+
+	return status
+	
+def G():
+
+	status = 0
+	
+	status = H()
+
+	if(status == 0):
+	
+		status = G1()
+
+	return status
+
+def G1():
+
+	status = 0
+	
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "arithmeticOperator" and tv == "*"):
+	
+		status = H()
+		
+		if(status == 0):
+		
+			status = G1()
+			
+	else:
+	
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value)
+		#print(str(lb) + " " + str(fp))
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+
+
+	return status
+	
+def H():
+
+	status = 0
+	
+	status = I()
+	
+	if(status == 0):
+	
+		status = H1()
+
+	return status
+	
+def H1():
+
+	status = 0
+	
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "arithmeticOperator" and tv == "/"):
+		
+		status = I()
+		
+		if(status == 0):
+		
+			status = H1()
+			
+	else:
+	
+		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+		global lb, fp
+		#print(token_value + ":::" + str(len(token_value)))
+		#print(str(lb) + " " + str(fp))
+		
+		lb = lb - len(token_value)
+		fp = fp - len(token_value)
+
+	return status
+	
+def I():
+
+	status = 0
+
+	token = lexer()
+	token_type = list(token.keys())[0]
+	token_value = list(token.values())[0]
+	tv = token_value.strip()
+	
+	if(token_type == "arithmeticOperator" and tv == "-"):
+	
+		status = I()
+	
+	
+			
+	elif(not(token_type == "identifier" or token_type == "number")):
+		
+		print("Syntax error: expected 'Identifier/Number' but received " + str(token_value) + "\n")
+		status = 1
+
+	return status
+	
+	
 
 prg = open("nocomments.c").read()
 
@@ -666,13 +1039,14 @@ fp = 1
 
 symbolTable = dict()
 externalVariables = dict()
+localVariables = list()
 keyword = ["include", "define", "while", "do", "for", "return", "extern"]
 dataType = ["void", "int", "short", "long", "char", "float", "double"]
 preDefRoutine = ["printf", "scanf"]
 #headerFile = ["stdio.h", "stdlib.h", "math.h", "string.h"]
 identifier = "^[^\d\W]\w*\Z"
 punctuator = "^[()[\]{};.,]$"
-aritmeticOperator = "^[-+*]$"
+aritmeticOperator = "^[-+*/]$"
 assignmentOperator = "^=$"
 relationalOperator = ["<", ">", "<=", ">=", "==", "!="]
 logicalOperator = ["&&", "||", "!"]

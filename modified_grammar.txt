@@ -15,11 +15,13 @@ optionalDeclarationStatement:	dataType variable
 
 variable: identifier variableDash
 
-variableDash: , identifier variableDash | e
+variableDash: , identifier variableDash 
+				| e
 
 mainFunction: int main_dash
 
-mainDash: main(){statements} | main(int argc, char *argv[]){statements}
+mainDash: main(){statements} 
+		  | main(int argc, char *argv[]){statements}
 
 
 statements:	optDeclarationStatement ; statements
@@ -30,36 +32,50 @@ statements:	optDeclarationStatement ; statements
 			
 
 
-initializationStatement: dataType initstat
+initializationStatement: dataType initstat 
+						 | e
 
-initstat: identifier assignmentOperator E | multipleInitialization
+initstat: identifier assignmentOperator E 
+			| multipleInitialization
 
 
 multipleInitialization: identifier assignmentOperator E multinit
 
-multinit : , multipleInitialization | e
+multinit : , multipleInitialization 
+				| e
 
-assignmentStatement: identifier assignmentOperator E;
+assignmentStatement: identifier assignmentOperator E
+						| e
 
-condition: E relationalOperator E | E logicalOperator E | true | false
+condition: E relationalOperator E 
+			| E logicalOperator E 
+			| true 
+			| false
 
 E: F E1
 
-E1: + F E1 | e
+E1: + F E1 
+		| e
 
 F: G F1
 
-F1: - G F1 | e
+F1: - G F1 
+		| e
 
 G: H G1
 
-G1: * H G1 | e
+G1: * H G1 
+		| e
 
 H: I H1
 
-H1: / I H1 | e
+H1: / I H1 
+		| e
 
-I: - I | identifier | number
+		
+I: - I
+	| identifier 
+	| number
 
 relationalOperator: < | > | <= | >= | == | !=
 
@@ -67,6 +83,56 @@ logicalOperator: && | || | !
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elif(token_type == "incrementOperator" and tv == "++"):
+	
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		
+		if(not(token_type == "identifier")):
+		
+			print("Syntax error: expected 'Identifier' but received " + str(token_value) + "\n")
+			status = 1	
+			
+	elif(token_type == "decrementOperator" and tv == "--"):
+	
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		
+		if(not(token_type == "identifier")):
+		
+			print("Syntax error: expected 'Identifier' but received " + str(token_value) + "\n")
+			status = 1	
+		
+			
+	elif(token_type == "identifier"):
+	
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		
+		if(not(token_type == "decrementOperator" or token_type == "incrementOperator")):
+		
+			print("Syntax error: expected 'Increment/Decrement Operator' but received " + str(token_value) + "\n")
+			status = 1
 
 
 
