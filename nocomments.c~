@@ -5,8 +5,11 @@ extern int x, y;
 
 int main(int argc, char *argv[])
 {
+	int a = 5;
 	do
 	{
+		b = 4 / 3;
+		c = x--;
 	}
-	while);
+	while(x < 5);
 }
