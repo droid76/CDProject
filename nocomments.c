@@ -5,7 +5,9 @@ extern int x, y;
 
 int main(int argc, char *argv[])
 {
-	int a = 5;
+	int a, b;
+	
+	int a = 5, b = 6, c = a + b;
 	do
 	{
 		b = 4 / 3;

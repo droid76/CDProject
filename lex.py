@@ -223,7 +223,7 @@ def externDeclaration():
 			token_value = list(token.values())[0].strip()
 
 			if(not (token_type == "punctuator" and token_value == ";")):
-				print("Syntax error: expected 'Punctuator Semicolon' but received " + str(token_value) + "\n")
+				print("Syntax error: expected 'Punctuator Semicolon1' but received " + str(token_value) + "\n")
 				status = 1
 	else:
 		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
@@ -261,6 +261,7 @@ def optionalDeclarationStatement():
 
 	if(token_type == 'dataType'):
 	
+		
 		dataType = token_value.strip()
 		status = variable(dataType)
 		
@@ -548,11 +549,21 @@ def statements():
 		if(token_type == "punctuator" and tv == ";"):
 			status = statements()
 		else:
-			print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+			print("Syntax error: expected 'Punctuator semicolon2' but received " + str(token_value) + "\n")
 			status = 1
 			
+			
 	else:
+		
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		tv = token_value.strip()
+		print("dc" + " " + tv)
+		
+		
 		status = optionalDeclarationStatement()
+		#print(status)
 		if(status == 0):	
 			#print("decl success")
 			token = lexer()
@@ -562,9 +573,11 @@ def statements():
 			if(token_type == "punctuator" and tv == ";"):
 				status = statements()
 			else:
-				print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+				print("Syntax error: expected 'Punctuator semicolon3' but received " + str(token_value) + "\n")
 				status = 1
 		else:
+			
+			
 			
 			status = assignmentStatement()
 			if(status == 0):
@@ -577,7 +590,7 @@ def statements():
 				if(token_type == "punctuator" and tv == ";"):
 					status = statements()
 				else:
-					print("Syntax error: expected 'Punctuator semicolon' but received " + str(token_value) + "\n")
+					print("Syntax error: expected 'Punctuator semicolon4' but received " + str(token_value) + "\n")
 					status = 1
 			else:
 				
@@ -636,7 +649,7 @@ def statements():
 													status = statements()
 					
 												else:
-													print("Syntax error: expected 'Punctuator semicolon' ", end = "")
+													print("Syntax error: expected 'Punctuator semicolon5' ", end = "")
 													print("but received " + str(token_value) + "\n")
 													status = 1
 					
@@ -677,6 +690,8 @@ def initializationStatement():
 
 	status = 0
 	
+	global lb, fp
+		
 	token = lexer()
 	token_type = list(token.keys())[0]
 	token_value = list(token.values())[0]
@@ -684,20 +699,82 @@ def initializationStatement():
 	if(token_type == "dataType"):
 	
 		status = initStat()
+		
+		if(status == 2):
+		
+			print(len(token_value))
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0]
+			print(token_value)
+			lb = lb - len(token_value)
+			fp = fp - len(token_value)
+				
+		#print(status)
 	else:
 		
 		#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
-		global lb, fp
 		#print(token_value)
 		#print(str(lb) + " " + str(fp))
 		lb = lb - len(token_value)
 		fp = fp - len(token_value)
 		status = 2
-		
+	#print('returning' + str(status))	
 	return status
 	
 	
 def initStat():
+
+
+	status = multipleInitialization()
+	#print(status)
+	
+	
+	
+	if(status != 0 and status != 2):
+
+		status = 0
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+	
+		if(token_type == "identifier"):
+		
+		
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0]
+	
+			if(token_type == "assignmentOperator" and token_value == "="):
+				
+				status = E()
+				"""
+				print(status)
+				status = 0
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0]
+				print(token_value)
+				"""
+			
+			elif(token_type == "punctuator" and token_value == ","):
+			
+				global lb, fp
+				#print(token_value)
+				#print(str(lb) + " " + str(fp))
+				lb = lb - len(token_value)
+				fp = fp - len(token_value)
+				status = 2
+			
+			else:
+				
+				print("Syntax error: expected 'Assignment1 Operator' but received " + str(token_value) + "\n")
+				status = 1
+		
+	
+	return status
+		
+def multipleInitialization():
 
 	status = 0
 	token = lexer()
@@ -705,7 +782,6 @@ def initStat():
 	token_value = list(token.values())[0]
 	
 	if(token_type == "identifier"):
-		
 		
 		token = lexer()
 		token_type = list(token.keys())[0]
@@ -714,38 +790,26 @@ def initStat():
 		if(token_type == "assignmentOperator" and token_value == "="):
 				
 			status = E()
+			#print(status)
 			
-		else:
-			
-			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
-			status = 1
-			
-	else:
-	
-		status = multipleInitialization()
-		
-	return status
-		
-def mutipleInitialization():
-
-	status = 0
-	token = lexer()
-	token_type = list(token.keys())[0]
-	token_value = list(token.values())[0]
-	
-	if(token_type == "identifier"):
-		
-		token = lexer()
-		token_type = list(token.keys())[0]
-		token_value = list(token.values())[0]
-	
-		if(token_type == "assignmentOperator" and token_value == "="):
+			if(status == 0):
 				
-			status = multinit()
+				status = multinit()
+				if(status == 2):
+					status = 0
+				#print(status)
+		elif(token_type == "punctuator" and token_value == ","):
+			
+			global lb, fp
+			#print(token_value)
+			#print(str(lb) + " " + str(fp))
+			lb = lb - len(token_value)
+			fp = fp - len(token_value)
+			status = 2
 			
 		else:
-			
-			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
+				
+			print("Syntax error: expected 'Assignment2 Operator' but received " + str(token_value) + "\n")
 			status = 1
 	else:
 			
@@ -765,6 +829,7 @@ def multinit():
 	
 	if(token_type == "punctuator" and tv == ","):
 	
+		#print("got comma")
 		status = multipleInitialization()
 	
 	else:
@@ -798,7 +863,7 @@ def assignmentStatement():
 			
 		else:
 			
-			print("Syntax error: expected 'Assignment Operator' but received " + str(token_value) + "\n")
+			print("Syntax error: expected 'Assignment3 Operator' but received " + str(token_value) + "\n")
 			status = 1
 	else:
 			
