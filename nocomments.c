@@ -1,17 +1,19 @@
-#include<stdio.h>
-#define a 10
-
-extern int x, y;
-
-int main(int argc, char *argv[])
+#include<stdio.h> 
+int main()
 {
-	int a, b;
+	int x=3+4; 
+	do{
+	     x=x+1;
+	     do{
+	     	int y = 0;
+	     }
+	     while(y<3);
+	 }
 	
-	int a = 5, b = 6, c = a + b;
-	do
-	{
-		b = 4 / 3;
-		c = x;
-	}
-	while(x < 5);
+	while(x < 9);
+	int a = x + 4 * 9;
+
 }
+
+
+

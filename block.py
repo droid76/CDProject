@@ -668,7 +668,8 @@ def statements():
 					if(token_type == "punctuator" and token_value == "{"):
 						#print("{")
 						status = statements()
-						
+					
+
 						#print("status: " + str(status))
 						if(status == 0):
 					
@@ -730,21 +731,137 @@ def statements():
 							else:
 								print("Syntax error: expected 'Punctuator10 close curly bracket' but received " + str(token_value) + "\n")
 								status = 1
+
+					elif(token_type == "identifier" or token_type == "datatype"):
+						global lb, fp
+						#print(token_value)
+						#print(str(lb) + " " + str(fp))
+						lb = lb - len(token_value)
+						fp = fp - len(token_value)
+						status = statement1()
+
 				
 					else:
 						print("Syntax error: expected 'Punctuator open curly bracket' but received " + str(token_value) + "\n")
 						status = 1
 		
+				
 				else:
-		
-					#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
-					global lb, fp
-					#print(token_value)
-					#print(str(lb) + " " + str(fp))
-					lb = lb - len(token_value)
-					fp = fp - len(token_value)
+					status = 0
+					tv = token_value.strip()
+					#print("IN statements: " + token_value)
+					if(tv == "{"):
+							status = statements()
+							
+							#print("status: " + str(status))
+							if(status == 0):
+						
+								token = lexer()
+								token_type = list(token.keys())[0]
+								token_value = list(token.values())[0].strip()
+								#print(token_value)
+								if(token_type == "punctuator" and token_value == "}"):
+									status = statements()
+								else:
+									print("Error")
+					else:
+			
+						#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+						#global lb, fp
+						#print(token_value)
+						#print(str(lb) + " " + str(fp))
+						lb = lb - len(token_value)
+						fp = fp - len(token_value)
+									
 	
 	return status
+
+def statement1():
+	status = 0
+	status = initializationStatement()
+	
+	if(status == 0):
+		#print("init success")
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0]
+		#print(token_value +" new value")
+		tv = token_value.strip()
+		if(token_type == "punctuator" and tv == ";"):
+			status = 0
+		else:
+			status = 1
+			print("Error")
+	else:
+			
+			status = assignmentStatement()
+			if(status == 0):
+				#print("assgn success")
+				
+				token = lexer()
+				token_type = list(token.keys())[0]
+				token_value = list(token.values())[0]
+				tv = token_value.strip()
+				if(token_type == "punctuator" and tv == ";"):
+					status = 0
+				else:
+					status = 1
+					print("Error")
+	if(status ==0):
+		token = lexer()
+		token_type = list(token.keys())[0]
+		token_value = list(token.values())[0].strip()
+		
+		if(token_type == "keyword" and token_value == "while"):
+				#print("while")
+			token = lexer()
+			token_type = list(token.keys())[0]
+			token_value = list(token.values())[0].strip()
+
+			if(token_type == "punctuator" and token_value == "("):
+				#print("(")
+				status = condition()
+				lab2()
+				if(status == 0):
+
+					token = lexer()
+					token_type = list(token.keys())[0]
+					token_value = list(token.values())[0].strip()
+
+					if(token_type == "punctuator" and token_value == ")"):
+						#print(")")
+						token = lexer()
+						token_type = list(token.keys())[0]
+						token_value = list(token.values())[0].strip()
+
+						if(token_type == "punctuator" and token_value == ";"):
+							#print("in statements: " + token_value + "\n")
+							status = statements()
+
+						else:
+							print("Syntax error: expected 'Punctuator semicolon5' ", end = "")
+							print("but received " + str(token_value) + "\n")
+							status = 1
+
+					else:
+						print("Syntax error: expected 'Punctuator close round bracket' ", end = "")
+						print("but received " + str(token_value) + "\n")
+						status = 1
+
+			else:
+				print("Syntax error: expected 'Punctuator open round bracket' ", end = "") 
+				print("but received " + str(token_value) + "\n")
+				status = 1
+
+		else:
+			print("Syntax error: expected 'Keyword while' but received " + str(token_value) + "\n")
+			status = 1
+
+	else:
+		print("Syntax error: expected 'Punctuator10 close curly bracket' but received " + str(token_value) + "\n")
+		status = 1
+	return status
+
 
 def initializationStatement():
 

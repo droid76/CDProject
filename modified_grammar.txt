@@ -27,7 +27,8 @@ mainDash: main(){statements}
 statements:	optDeclarationStatement ; statements
 			| initializationStatement ; statements
 			| assignmentStatement ; statements
-			| do{statements} while(condition); statements
+			| do{statements} while(expression); statements
+			| {statements} statements
 			| e
 			
 
@@ -47,7 +48,7 @@ multinit : , multipleInitialization
 assignmentStatement: identifier assignmentOperator E
 						| e
 
-condition: E relationalOperator E 
+expression: E relationalOperator E 
 			| E logicalOperator E 
 			| true 
 			| false

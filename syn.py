@@ -50,6 +50,7 @@ def validLexeme(string):
 top = 0;
 i_ = 1;
 tmp = "";
+do = 0
 li = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 def push(val):
 	global top,li
@@ -60,9 +61,11 @@ def push(val):
 
 def codegen():
 	global tmp,i_,top,li
-	tmp = "t"
+	tmp = "N"
 	tmp+=str(i_)
-	print(tmp +" = "+str(li[top-2]), str(li[top-1]), str(li[top]));
+	print("NODE "+tmp +" -> "+str(li[top-2])+" <-- "+ str(li[top-1])+" --> "+ str(li[top]));
+	#if(do==1):
+		#print("do --> "+tmp)
 	top-=2;
 	li[top]=tmp
 	i_=i_+1;
@@ -79,22 +82,27 @@ def codegen_umin():
 
 def codegen_assign():
 	global tmp,i_,top,li
-	print(str(li[top-1])+" = "+str(li[top]));
+	print(str(li[top-1])+" <-- = --> "+str(li[top]));
+	if(do!=0):
+		print("do --> =")
+	else:
+		print("main --> =")
 	top=top-2;
 label = 1
 
 def lab1():
 	global label
-	print("L"+str(label)+":")
+	#print("L"+str(label)+":")
 	label = label+1
-	
+wh = ["dd"]	
 def lab2():
-	global tmp,i_,top,li,label
-	tmp = "t"
+	global tmp,i_,top,li,label,wh
+	tmp = "N"
 	tmp+=str(i_)
-	print(tmp+" =  "+li[top-2],li[top-1],li[top]);
-	print("if "+tmp+" goto L"+str(label-1));
+	print("NODE "+tmp +" -> "+str(li[top-2])+" <-- "+ str(li[top-1])+" --> "+ str(li[top]));
+	#print("if "+tmp+" goto L"+str(label-1));
 	i_=i_+1;
+	wh[0]=tmp
 	label = label-1;
 	top = top-3;
 
@@ -659,8 +667,12 @@ def statements():
 				token_type = list(token.keys())[0]
 				token_value = list(token.values())[0]
 				#print("IN statements: " + token_value)
+				global li
+				#print(str(li))
 				if(token_type == "keyword" and token_value == "do"):
 					#print("Do")
+					global do
+					do = do+1
 					token = lexer()
 					token_type = list(token.keys())[0]
 					token_value = list(token.values())[0].strip()
@@ -681,7 +693,11 @@ def statements():
 								token = lexer()
 								token_type = list(token.keys())[0]
 								token_value = list(token.values())[0].strip()
-		
+								do = do-1
+								if(do==0):
+									print("main --> do")
+								else:
+									print("do --> do")
 								if(token_type == "keyword" and token_value == "while"):
 									#print("while")
 									token = lexer()
@@ -700,6 +716,9 @@ def statements():
 		
 											if(token_type == "punctuator" and token_value == ")"):
 												#print(")")
+												
+												global wh
+												print("while --> "+wh[0])
 												token = lexer()
 												token_type = list(token.keys())[0]
 												token_value = list(token.values())[0].strip()
@@ -707,6 +726,10 @@ def statements():
 												if(token_type == "punctuator" and token_value == ";"):
 													#print("in statements: " + token_value + "\n")
 													status = statements()
+													if(do==0):
+														print("main --> while")
+													else:
+														print("do --> while")
 					
 												else:
 													print("Syntax error: expected 'Punctuator semicolon5' ", end = "")
@@ -736,13 +759,31 @@ def statements():
 						status = 1
 		
 				else:
-		
-					#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
-					global lb, fp
-					#print(token_value)
-					#print(str(lb) + " " + str(fp))
-					lb = lb - len(token_value)
-					fp = fp - len(token_value)
+					status = 0
+					tv = token_value.strip()
+					#print("IN statements: " + token_value)
+					if(tv == "{"):
+							status = statements()
+							
+							#print("status: " + str(status))
+							if(status == 0):
+						
+								token = lexer()
+								token_type = list(token.keys())[0]
+								token_value = list(token.values())[0].strip()
+								#print(token_value)
+								if(token_type == "punctuator" and token_value == "}"):
+									status = statements()
+								else:
+									print("Error")
+					else:
+			
+						#RESET POINTERS SINCE A WRONG TOKEN WAS OBTAINED
+						global lb, fp
+						#print(token_value)
+						#print(str(lb) + " " + str(fp))
+						lb = lb - len(token_value)
+						fp = fp - len(token_value)
 	
 	return status
 
@@ -842,16 +883,7 @@ def multipleInitialization(dt):
 		push(tk)
 		#print(tk)
 		if(token_value not in data[dt]):
-				if(dt=="int"):
-					data[dt][token_value]=int(0)
-				elif(dt=="char"):
-					data[dt][token_value]=string(0)
-				elif(dt=="float"):
-					data[dt][token_value]=float(0)
-				elif(dt=="double"):
-					data[dt][token_value]=float(0)
-				else:
-					data[dt][token_value]=0
+				data[dt][token_value]=0
 				#print(" "+token_value +":)")
 		else:
 				print("Syntax Error: The variable has already been initialized\n")
@@ -1206,18 +1238,8 @@ def I(dt,vn):
 		push(tv)
 		#print(tv)
 	global op;
-	g = True
-	if(token_value == "identifier"):
-		if(token_value not in data[dt]):
-			print("Syntax error: The variable "+token_value+" not in "+dt)
-			g = False
-	elif(token_value == "number"):
-		if(not isinstance(token_value,dt)):
-			print("Syntax error: The variable belongs to a different type")
-			False
-	if(op=="" and g == True):
+	if(op==""):
 		if(token_type == "identifier"):
-
 			if(chk==1):
 				data[dt][vn]=-1*data[dt][token_value]
 				chk = 0
@@ -1231,7 +1253,7 @@ def I(dt,vn):
 				chk = 0
 			else:
 				data[dt][vn]=float(token_value)
-	elif(op=="d" and g == True):
+	elif(op=="d"):
 		if(token_type == "identifier"):
 			if(chk==1):
 				data[dt][vn]/=-1*data[dt][token_value]
@@ -1249,7 +1271,7 @@ def I(dt,vn):
 			else:
 				data[dt][vn]/=float(token_value)
 				op = ""
-	elif(op=="*" and g == True):
+	elif(op=="*"):
 		if(token_type == "identifier"):
 			if(chk==1):
 				data[dt][vn]*=-1*data[dt][token_value]
@@ -1267,7 +1289,7 @@ def I(dt,vn):
 			else:
 				data[dt][vn]*=float(token_value)
 				op = ""
-	elif(op=="-" and g == True):
+	elif(op=="-"):
 		if(token_type == "identifier"):
 			if(chk==1):
 				data[dt][vn]-=-1*data[dt][token_value]
@@ -1285,7 +1307,7 @@ def I(dt,vn):
 			else:
 				data[dt][vn]-=float(token_value)
 				op = ""
-	elif(op=="+" and g == True):
+	elif(op=="+"):
 		if(token_type == "identifier"):
 			if(chk==1):
 				data[dt][vn]+=-1*data[dt][token_value]
